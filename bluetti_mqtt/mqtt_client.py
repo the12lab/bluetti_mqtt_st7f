@@ -4,11 +4,13 @@ from enum import auto, Enum, unique
 import json
 import logging
 import re
-from typing import List, Optional
-from asyncio_mqtt import Client, MqttError
-from paho.mqtt.client import MQTTMessage
-from bluetti_mqtt.bus import CommandMessage, EventBus, ParserMessage
-from bluetti_mqtt.core import BluettiDevice, DeviceCommand
+from typing import List, Optional, Any
+
+import aiomqtt
+from aiomqtt import Client, MqttError, ProtocolVersion
+
+from .bus import CommandMessage, EventBus, ParserMessage
+from .core import BluettiDevice, DeviceCommand
 
 
 @unique
@@ -535,10 +537,11 @@ class MQTTClient:
         await self.message_queue.put(msg)
 
     async def _handle_commands(self, client: Client):
-        async with client.filtered_messages('bluetti/command/#') as messages:
-            await client.subscribe('bluetti/command/#')
-            async for mqtt_message in messages:
-                await self._handle_command(mqtt_message)
+        topic = 'bluetti/command/#'
+        await client.subscribe(topic)
+        async for message in client.messages:
+            if message.topic.matches(topic):
+                await self._handle_command(message)
 
     async def _handle_messages(self, client: Client):
         while True:
@@ -556,10 +559,10 @@ class MQTTClient:
         if self.home_assistant_mode == 'none':
             return
 
-        def payload(id: str, device: BluettiDevice, field: MqttFieldConfig) -> str:
-            ha_id = id if not field.id_override else field.id_override
+        def payload(prop: str, payload_field: MqttFieldConfig) -> str:
+            ha_id = prop if not payload_field.id_override else payload_field.id_override
             payload_dict = {
-                'state_topic': f'bluetti/state/{device.type}-{device.sn}/{id}',
+                'state_topic': f'bluetti/state/{device.type}-{device.sn}/{prop}',
                 'device': {
                     'identifiers': [
                         f'{device.sn}'
@@ -571,9 +574,9 @@ class MQTTClient:
                 'unique_id': f'{device.sn}_{ha_id}',
                 'object_id': f'{device.type}_{ha_id}',
             }
-            if field.setter:
-                payload_dict['command_topic'] = f'bluetti/command/{device.type}-{device.sn}/{id}'
-            payload_dict.update(field.home_assistant_extra)
+            if payload_field.setter:
+                payload_dict['command_topic'] = f'bluetti/command/{device.type}-{device.sn}/{prop}'
+            payload_dict.update(payload_field.home_assistant_extra)
 
             return json.dumps(payload_dict, separators=(',', ':'))
 
@@ -589,18 +592,21 @@ class MQTTClient:
 
             # Figure out Home Assistant type
             if field.type == MqttFieldType.NUMERIC:
-                type = 'number' if field.setter else 'sensor'
+                ha_type = 'number' if field.setter else 'sensor'
             elif field.type == MqttFieldType.BOOL:
-                type = 'switch' if field.setter else 'binary_sensor'
+                ha_type = 'switch' if field.setter else 'binary_sensor'
             elif field.type == MqttFieldType.ENUM:
-                type = 'select' if field.setter else 'sensor'
+                ha_type = 'select' if field.setter else 'sensor'
             elif field.type == MqttFieldType.BUTTON:
-                type = 'button'
+                ha_type = 'button'
+            else:
+                logging.warning(f'Unknown field type: {name=} {field.type=}')
+                continue
 
             # Publish config
             await client.publish(
-                f'homeassistant/{type}/{device.sn}_{name}/config',
-                payload=payload(name, device, field).encode(),
+                f'homeassistant/{ha_type}/{device.sn}_{name}/config',
+                payload=payload(name, field).encode(),
                 retain=True
             )
 
@@ -615,7 +621,7 @@ class MQTTClient:
                 # Publish config
                 await client.publish(
                     f'homeassistant/sensor/{device.sn}_{field.id_override}/config',
-                    payload=payload(f'pack_details{pack}', device, field).encode(),
+                    payload=payload(f'pack_details{pack}', field).encode(),
                     retain=True
                 )
 
@@ -624,46 +630,46 @@ class MQTTClient:
             for name, field in DC_INPUT_FIELDS.items():
                 await client.publish(
                     f'homeassistant/sensor/{device.sn}_{name}/config',
-                    payload=payload(name, device, field).encode(),
+                    payload=payload(name, field).encode(),
                     retain=True
                 )
 
         logging.info(f'Sent discovery message of {device.type}-{device.sn} to Home Assistant')
 
-    async def _handle_command(self, mqtt_message: MQTTMessage):
-        # Parse the mqtt_message.topic
-        m = COMMAND_TOPIC_RE.match(mqtt_message.topic)
+    async def _handle_command(self, message: aiomqtt.Message):
+        # Parse the message.topic
+        m = COMMAND_TOPIC_RE.match(message.topic.value)
         if not m:
-            logging.warn(f'unknown command topic: {mqtt_message.topic}')
+            logging.warning(f'unknown command topic: {message.topic}')
             return
 
         # Find the matching device for the command
         device = next((d for d in self.devices if d.type == m[1] and d.sn == m[2]), None)
         if not device:
-            logging.warn(f'unknown device: {m[1]} {m[2]}')
+            logging.warning(f'unknown device: {m[1]} {m[2]}')
             return
 
         # Check if the device supports setting this field
         if not device.has_field_setter(m[3]):
-            logging.warn(f'Received command for unknown topic: {m[3]} - {mqtt_message.topic}')
+            logging.warning(f'Received command for unknown topic: {m[3]} - {message.topic}')
             return
 
         cmd: DeviceCommand = None
         if m[3] in NORMAL_DEVICE_FIELDS:
             field = NORMAL_DEVICE_FIELDS[m[3]]
             if field.type == MqttFieldType.ENUM:
-                value = mqtt_message.payload.decode('ascii')
+                value = message.payload.decode('ascii')
                 cmd = device.build_setter_command(m[3], value)
             elif field.type == MqttFieldType.BOOL or field.type == MqttFieldType.BUTTON:
-                value = mqtt_message.payload == b'ON'
+                value = message.payload == b'ON'
                 cmd = device.build_setter_command(m[3], value)
             elif field.type == MqttFieldType.NUMERIC:
-                value = int(mqtt_message.payload.decode('ascii'))
+                value = int(message.payload.decode('ascii'))
                 cmd = device.build_setter_command(m[3], value)
             else:
                 raise AssertionError(f'unexpected enum type: {field.type}')
         else:
-            logging.warn(f'Received command for unhandled topic: {m[3]} - {mqtt_message.topic}')
+            logging.warning(f'Received command for unhandled topic: {m[3]} - {message.topic}')
             return
 
         await self.bus.put(CommandMessage(device, cmd))

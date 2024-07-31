@@ -8,11 +8,12 @@ import sys
 import textwrap
 import time
 from typing import cast
-from bluetti_mqtt.bluetooth import (
+
+from .bluetooth import (
     check_addresses, scan_devices, BluetoothClient, ModbusError,
     ParseError, BadConnectionError
 )
-from bluetti_mqtt.core import (
+from .core import (
     BluettiDevice, ReadHoldingRegisters, DeviceCommand
 )
 

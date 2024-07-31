@@ -8,8 +8,9 @@ import sys
 import textwrap
 import time
 from typing import cast
-from bluetti_mqtt.bluetooth import BluetoothClient, ModbusError, ParseError, BadConnectionError
-from bluetti_mqtt.core import ReadHoldingRegisters
+
+from .bluetooth import BluetoothClient, ModbusError, ParseError, BadConnectionError
+from .core import ReadHoldingRegisters
 
 
 def log_packet(output: TextIOWrapper, data: bytes, command: ReadHoldingRegisters):

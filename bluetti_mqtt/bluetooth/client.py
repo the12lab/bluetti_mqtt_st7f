@@ -65,7 +65,7 @@ class BluetoothClient:
                 elif self.state == ClientState.DISCONNECTING:
                     await self._disconnect()
                 else:
-                    logging.warn(f'Unexpected current state {self.state}')
+                    logging.warning(f'Unexpected current state {self.state}')
                     self.state = ClientState.NOT_CONNECTED
         finally:
             # Ensure that we disconnect
@@ -162,7 +162,7 @@ class BluetoothClient:
 
     async def _disconnect(self):
         await self.client.disconnect()
-        logging.warn(f'Delayed reconnect to {self.address} after error')
+        logging.warning(f'Delayed reconnect to {self.address} after error')
         await asyncio.sleep(5)
         self.state = ClientState.NOT_CONNECTED
 

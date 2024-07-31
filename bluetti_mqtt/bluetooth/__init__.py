@@ -2,8 +2,8 @@ import logging
 import re
 from typing import Set
 from bleak import BleakScanner
-from bleak.backends.device import BLEDevice
-from bluetti_mqtt.core import BluettiDevice, AC200M, AC300, AC500, AC60, EP500, EP500P, EP600, EB3A
+
+from ..core import AC200M, AC300, AC500, AC60, EP500, EP500P, EP600, EB3A
 from .client import BluetoothClient
 from .exc import BadConnectionError, ModbusError, ParseError
 from .manager import MultiDeviceManager
