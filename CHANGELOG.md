@@ -2,6 +2,15 @@
 
 ## FUTURE
 
+## 0.15.2
+
+* Don't try to connect to device if already connected
+
+## 0.15.1
+
+* Replace aiomqtt instead of asyncio-mqtt
+* Upgrade libraries to latest versions
+
 ## 0.15.0
 
 * Add additional battery pack details for AC200M, AC300, EP500(P), and AC500

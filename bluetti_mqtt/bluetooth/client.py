@@ -75,9 +75,13 @@ class BluetoothClient:
     async def _connect(self):
         """Establish connection to the bluetooth device"""
         try:
-            await self.client.connect()
-            self.state = ClientState.CONNECTED
-            logging.info(f'Connected to device: {self.address}')
+            if not self.client.is_connected:
+                await self.client.connect()
+                self.state = ClientState.CONNECTED
+                logging.info(f'Connected to device: {self.address}')
+            else:
+                logging.info(f'Already connected to device: {self.address}')
+                self.state = ClientState.CONNECTED
         except BleakDeviceNotFoundError:
             logging.debug(f'Error connecting to device {self.address}: Not found')
         except (BleakError, EOFError, asyncio.TimeoutError):
