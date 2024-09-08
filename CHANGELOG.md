@@ -2,6 +2,10 @@
 
 ## FUTURE
 
+## 0.15.3
+
+* Update aiomqtt to 2.3.0
+
 ## 0.15.2
 
 * Don't try to connect to device if already connected

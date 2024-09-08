@@ -1,4 +1,4 @@
-aiomqtt==2.2.0
+aiomqtt==2.3.0
 bleak==0.22.2
 crcmod==1.7
 dbus-next==0.2.3
