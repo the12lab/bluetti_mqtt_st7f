@@ -2,6 +2,10 @@
 
 ## FUTURE
 
+## 0.15.4
+
+* Add AC70 support
+
 ## 0.15.3
 
 * Update aiomqtt to 2.3.0
