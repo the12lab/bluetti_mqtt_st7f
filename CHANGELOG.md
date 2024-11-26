@@ -2,6 +2,11 @@
 
 ## FUTURE
 
+## 0.15.5
+
+* Add AC180 support
+* Add AC70P, AC180P support, not tested
+
 ## 0.15.4
 
 * Add AC70 support
