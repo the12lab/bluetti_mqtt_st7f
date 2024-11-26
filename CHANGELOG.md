@@ -2,6 +2,10 @@
 
 ## FUTURE
 
+## 0.15.6
+
+* Update bleak to 0.22.3
+
 ## 0.15.5
 
 * Add AC180 support
