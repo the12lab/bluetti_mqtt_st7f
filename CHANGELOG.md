@@ -2,6 +2,10 @@
 
 ## FUTURE
 
+## 0.15.7
+
+* Add AC200L, AC200PL support
+
 ## 0.15.6
 
 * Update bleak to 0.22.3

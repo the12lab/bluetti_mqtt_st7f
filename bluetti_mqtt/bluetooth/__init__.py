@@ -3,13 +3,13 @@ import re
 from typing import Set
 from bleak import BleakScanner
 
-from ..core import AC200M, AC300, AC500, AC60, AC70, AC180, EP500, EP500P, EP600, EB3A
+from ..core import AC200M, AC200L, AC300, AC500, AC60, AC70, AC180, EP500, EP500P, EP600, EB3A
 from .client import BluetoothClient
 from .exc import BadConnectionError, ModbusError, ParseError
 from .manager import MultiDeviceManager
 
 
-DEVICE_NAME_RE = re.compile(r'^(AC200M|AC300|AC500|AC60|AC70|AC70P|AC180|AC180P|EP500P|EP500|EP600|EB3A)(\d+)$')
+DEVICE_NAME_RE = re.compile(r'^(AC200M|AC200L|AC200PL|AC300|AC500|AC60|AC70|AC70P|AC180|AC180P|EP500P|EP500|EP600|EB3A)(\d+)$')
 
 
 async def scan_devices():
@@ -29,6 +29,8 @@ def build_device(address: str, name: str):
         raise Exception("device not supported (does not match device name regexp)")
     if match[1] == 'AC200M':
         return AC200M(address, match[2])
+    if match[1] in ['AC200L', 'AC200PL']:
+        return AC200L(address, match[2])
     if match[1] == 'AC300':
         return AC300(address, match[2])
     if match[1] == 'AC500':
