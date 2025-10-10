@@ -2,6 +2,10 @@
 
 ## FUTURE
 
+## 0.15.8
+
+* Update aiomqtt to 2.4.0, bleak to 1.1.1, crcmod to 1.7
+
 ## 0.15.7
 
 * Add AC200L, AC200PL support

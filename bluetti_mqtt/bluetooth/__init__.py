@@ -24,9 +24,8 @@ async def scan_devices():
 
 
 def build_device(address: str, name: str):
+    logging.info(f'Build device {name} with address {address}')
     match = DEVICE_NAME_RE.match(name)
-    if not match:
-        raise Exception("device not supported (does not match device name regexp)")
     if match[1] == 'AC200M':
         return AC200M(address, match[2])
     if match[1] in ['AC200L', 'AC200PL']:
@@ -49,6 +48,8 @@ def build_device(address: str, name: str):
         return EP600(address, match[2])
     if match[1] == 'EB3A':
         return EB3A(address, match[2])
+    if not match:
+        raise Exception("device not supported (does not match device name regexp)")
 
 
 async def check_addresses(addresses: Set[str]):
