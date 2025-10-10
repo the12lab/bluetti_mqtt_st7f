@@ -101,5 +101,6 @@ class DeviceHandler:
     def _get_device(self, address: str):
         if address not in self.devices:
             name = self.manager.get_name(address)
+            logging.info(f'Build device {name} with address {address}')
             self.devices[address] = build_device(address, name)
         return self.devices[address]

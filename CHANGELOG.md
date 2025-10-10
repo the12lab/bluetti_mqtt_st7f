@@ -2,6 +2,10 @@
 
 ## FUTURE
 
+## 0.15.9
+
+* update device name regexp
+
 ## 0.15.8
 
 * Update aiomqtt to 2.4.0, bleak to 1.1.1, crcmod to 1.7
