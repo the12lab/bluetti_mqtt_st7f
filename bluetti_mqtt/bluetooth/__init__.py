@@ -3,7 +3,7 @@ import re
 from typing import Set
 from bleak import BleakScanner
 
-from ..core import AC200M, AC200L, AC300, AC500, AC60, AC70, AC180, EP500, EP500P, EP600, EB3A, EL30V2
+from ..core import AC200M, AC200L, AC300, AC500, AC60, AC70, AC180, EP500, EP500P, EP600, EB3A
 from .client import BluetoothClient
 from .exc import BadConnectionError, ModbusError, ParseError
 from .manager import MultiDeviceManager
