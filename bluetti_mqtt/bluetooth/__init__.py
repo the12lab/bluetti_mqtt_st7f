@@ -9,7 +9,7 @@ from .exc import BadConnectionError, ModbusError, ParseError
 from .manager import MultiDeviceManager
 
 
-DEVICE_NAME_RE = re.compile(r'^[^\w]*(AC200M|AC200L|AC200PL|AC300|AC500|AC60|AC70|AC70P|AC180|AC180P|EP500P|EP500|EP600|EB3A|EL30V2)(\d+)[^\w]*$')
+DEVICE_NAME_RE = re.compile(r'^[^\w]*(AC200M|AC200L|AC200PL|AC300|AC500|AC60|AC70|AC70P|AC180|AC180P|EP500P|EP500|EP600|EB3A|EL30V2).(\d+)[^\w]*$')
 
 async def scan_devices():
     print('Scanning....')
