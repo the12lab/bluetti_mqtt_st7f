@@ -54,7 +54,7 @@ async def log_command(client: BluetoothClient, device: BluettiDevice, command: D
 
 async def log(address: str, path: str):
     print(f'CA scan')
-    asyncio.run(scan_devices())
+    await scan_devices()
     print(f'LOG check')
     
     devices = await check_addresses({address})
