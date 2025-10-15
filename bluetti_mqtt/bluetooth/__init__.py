@@ -57,6 +57,9 @@ def build_device(address: str, name: str):
         return EB3A(address, match[2]) #temp
 
 async def check_addresses(addresses: Set[str]):
+    print(f'CA scan')
+    scan_devices()
+    print(f'CA try connect')
     logging.debug(f'Checking we can connect: {addresses}')
     devices = await BleakScanner.discover()
     filtered = [d for d in devices if d.address in addresses]
