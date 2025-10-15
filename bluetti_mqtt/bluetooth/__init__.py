@@ -24,7 +24,7 @@ async def scan_devices():
 
 def build_device(address: str, name: str):
     print(f'BD {name}: {address}')
-    match = DEVICE_NAME_RE.match('EB3A')#(name)
+    match = DEVICE_NAME_RE.match('EB3A1234')#(name)
     if not match:
         raise Exception("device not supported (does not match device name regexp)")
     if match[1] == 'AC200M':
