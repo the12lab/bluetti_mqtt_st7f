@@ -9,7 +9,7 @@ from .exc import BadConnectionError, ModbusError, ParseError
 from .manager import MultiDeviceManager
 
 
-DEVICE_NAME_RE = re.compile(r'^[^\w]*(AC200M|AC200L|AC200PL|AC300|AC500|AC60|AC70|AC70P|AC180|AC180P|EP500P|EP500|EP600|EB3A|EL30V2).(\d+)[^\w]*$')
+DEVICE_NAME_RE = re.compile(r'^[^\w]*(AC200M|AC200L|AC200PL|AC300|AC500|AC60|AC70|AC70P|AC180|AC180P|EP500P|EP500|EP600|EB3A|EL30V2)(\d+)[^\w]*$')
 
 async def scan_devices():
     print('Scanning....')
@@ -17,9 +17,11 @@ async def scan_devices():
     if len(devices) == 0:
         print('0 devices found - something probably went wrong')
     else:
+        for d in devices:
+            print(f'Found {d.name}: address {d.address}')
         bluetti_devices = [d for d in devices if d.name and d.name!=None and DEVICE_NAME_RE.match(d.name)]
         for d in bluetti_devices:
-            print(f'Found {d.name}: address {d.address}')
+            print(f'Filtered {d.name}: address {d.address}')
 
 
 def build_device(address: str, name: str):
