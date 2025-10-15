@@ -18,7 +18,7 @@ async def scan_devices():
         print('0 devices found - something probably went wrong')
     else:
         for d in devices:
-            print(f'Found {d.name}: address {d.address}')
+            print(f'Have {d.name}: address {d.address}')
         bluetti_devices = [d for d in devices if d.name and d.name!=None and DEVICE_NAME_RE.match(d.name)]
         for d in bluetti_devices:
             print(f'Filtered {d.name}: address {d.address}')
